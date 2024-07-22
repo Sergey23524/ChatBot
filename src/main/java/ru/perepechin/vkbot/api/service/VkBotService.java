@@ -2,7 +2,6 @@ package ru.perepechin.vkbot.api.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.perepechin.vkbot.api.event.Event;
 import ru.perepechin.vkbot.api.event.Message;
@@ -16,19 +15,10 @@ import ru.perepechin.vkbot.exception.VkBotException;
 
 /**
  * Сервис для работы с VK api
- * <p> Сообщение для подтверждения авторизации {@link #confirmationMessage} </p>
- * <p> Сообщение при успешном получении event {@link #doneMessage} </p>
- * <p> Адрес Vk api {@link #vkServer} </p>
- * <p> Идентификатор группы {@link #groupId} </p>
  */
 @Service
 public class VkBotService {
     private static final Logger logger = LoggerFactory.getLogger(VkBotService.class);
-
-    private final String confirmationMessage;
-    private final String doneMessage;
-    private final String vkServer;
-    private final Long groupId;
 
     private final HttpClient client;
     private final ApiServiceParameters apiServiceParameters;
@@ -36,12 +26,7 @@ public class VkBotService {
     private static final String MSG = "Новое событие: %s";
     private static final String ANSWER_PREFIX = "Вы сказали: ";
 
-    public VkBotService(@Value("${confirmation.message}") String confirmationMessage, @Value("${ok.message}") String doneMessage,
-                        @Value("${vk.api.server}") String vkServer, @Value("${confirmation.group.id}") Long groupId, HttpClient client, ApiServiceParameters apiServiceParameters) {
-        this.confirmationMessage = confirmationMessage;
-        this.doneMessage = doneMessage;
-        this.vkServer = vkServer;
-        this.groupId = groupId;
+    public VkBotService(HttpClient client, ApiServiceParameters apiServiceParameters) {
         this.client = client;
         this.apiServiceParameters = apiServiceParameters;
     }
@@ -53,7 +38,7 @@ public class VkBotService {
      */
     @SuppressWarnings("unchecked")
     public String processEvent(Event<?> event) throws VkBotException {
-        if (!event.getGroup_id().equals(groupId)) {
+        if (!event.getGroup_id().equals(apiServiceParameters.getLongPropertyValue(ApiServiceParameters.CONFIRMATION_GROUP_ID))) {
             throw VkBotException.wrongGroupId(event.getGroup_id());
         }
         logger.info(String.format(MSG, event.getType().name()));
@@ -69,7 +54,7 @@ public class VkBotService {
     }
 
     private String confirm() {
-        return confirmationMessage;
+        return apiServiceParameters.getPropertyValue(ApiServiceParameters.CONFIRMATION_MESSAGE);
     }
 
     /**
@@ -79,16 +64,16 @@ public class VkBotService {
     private String newMessage(Event<MessageNew> event) throws VkBotException {
         Message msg = event.getObject().getMessage();
         sendMessage(msg.getFrom_id(), ANSWER_PREFIX + msg.getText());
-        return doneMessage;
+        return apiServiceParameters.getPropertyValue(ApiServiceParameters.OK_MESSAGE);
     }
 
     private void sendMessage(Integer from_id, String message) throws VkBotException {
         QueryBuilder<SendMessage> query = new QueryBuilder<>();
         client.post(query
-                .url(vkServer)
+                .url(apiServiceParameters.getPropertyValue(ApiServiceParameters.SERVER_API))
                 .method(VkMethod.MESSAGES_SEND)
                 .serviceParameters(apiServiceParameters.getServiceParameters())
-                .body(new SendMessage(from_id, message)).buildPost()
+                .body(new SendMessage(from_id, message, () -> (int) (System.currentTimeMillis() & 0xFFFFFFF))).buildPost()
         );
     }
 

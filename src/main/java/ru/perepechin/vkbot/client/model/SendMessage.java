@@ -15,9 +15,9 @@ public class SendMessage implements VkRequest {
     private Integer randomId;
     private String message;
 
-    public SendMessage(Integer userId, String message) {
+    public SendMessage(Integer userId, String message, MessageIdGenerator messageIdGenerator) {
         this.userId = userId;
-        this.randomId = 0;
+        this.randomId = messageIdGenerator.getId();
         this.message = message;
     }
 

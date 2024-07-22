@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    <changeSet id="v1.properties" author="Perepechin">
+        <createTable tableName="properties">
+            <column name="id" type="int" autoIncrement="true" generationType="BY DEFAULT">
+                <constraints primaryKey="true" primaryKeyName="pk_properties"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="val" type="VARCHAR(255)"></column>
+        </createTable>
+    </changeSet>
+    <changeSet id="v1.properties.insert" author="Perepechin">
+        <insert tableName="properties">
+            <column name="name" value="access.token"></column>
+            <column name="val" value=""></column>
+        </insert>
+        <insert tableName="properties">
+            <column name="name" value="vk.api.version"></column>
+            <column name="val" value=""></column>
+        </insert>
+        <insert tableName="properties">
+            <column name="name" value="vk.api.server"></column>
+            <column name="val" value=""></column>
+        </insert>
+        <insert tableName="properties">
+            <column name="name" value="confirmation.group.id"></column>
+            <column name="val" value=""></column>
+        </insert>
+        <insert tableName="properties">
+            <column name="name" value="confirmation.message"></column>
+            <column name="val" value=""></column>
+        </insert>
+        <insert tableName="properties">
+            <column name="name" value="ok.message"></column>
+            <column name="val" value=""></column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

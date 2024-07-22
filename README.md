@@ -28,3 +28,5 @@ docker build -t vkbot .
 ```
 docker run -p 8080:8080 -t vkbot
 ```
+
+### Настройки для работы с api лежат в базе H2, по пути: С:/[user]/VkBot/db
